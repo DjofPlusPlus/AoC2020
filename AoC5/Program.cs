@@ -16,21 +16,21 @@ namespace AoC5
 
 		static void Problem1(string[] entries)
 		{
-			Console.WriteLine("#1 Highest: " + entries.Select(ConvertSeat).Select(t => (t.Item1 * 8) + t.Item2).Max());
+			Console.WriteLine("#1 Highest: " + entries.Select(ConvertSeat).Max());
 					
 		}
 
 		static void Problem2(string[] entries)
 		{
-			var orderedSeatIDs = entries.Select(ConvertSeat).Select(t => (t.Item1 * 8) + t.Item2).OrderBy(v => v).ToList();
+			var orderedSeatIDs = entries.Select(ConvertSeat).OrderBy(v => v).ToList();
 			Console.WriteLine("#2 Missing ID: " + orderedSeatIDs.Where((v, i) => (v + 1) < orderedSeatIDs[i + 1]).Select(v => v + 1).First());
 		}
 
-		static Tuple<int, int> ConvertSeat(string entry)
+		static int ConvertSeat(string entry)
 		{
-			return Tuple.Create(
-				Convert.ToInt32(entry[..7].Replace('B', '1').Replace('F', '0'), 2),
-				Convert.ToInt32(entry[7..].Replace('R', '1').Replace('L', '0'), 2));
+			return 
+				(Convert.ToInt32(entry[..7].Replace('B', '1').Replace('F', '0'), 2) << 3) |	// Convert as binary, shift to *8
+				(Convert.ToInt32(entry[7..].Replace('R', '1').Replace('L', '0'), 2) << 0);
 		}
 
 
