@@ -18,48 +18,35 @@ namespace AoC8
 		static void Problem1(string[] ops)
 		{
 			int accumulator = 0;
-			var executedOps = new BitArray(ops.Length);
-			RunFrom(ops, 0, new BitArray(ops.Length), ref accumulator);
+			RunFrom(ops, null, 0, ref accumulator, new BitArray(ops.Length));
 			Console.WriteLine("#1: " + accumulator);
 		}
 
 		static void Problem2(string[] ops)
 		{
 			int accumulator = 0;
-			int instructionPointer = 0;
-			var executedOps = new BitArray(ops.Length);
-			bool simulationRanToEnd = false;
-			var fixMapping = new[] { new { Original = "nop", Fix = "jmp" }, new { Original = "jmp", Fix = "nop" } }.ToLookup(e => e.Original, e => e.Fix);
-			for (; ops.Length > instructionPointer && !executedOps[instructionPointer]; ++instructionPointer)
+			var patchMap = new Dictionary<string, string>() { ["nop"] = "jmp", ["jmp"] = "nop" }.ToLookup(i => i.Key, i => i.Value);
+			bool ranToEnd = RunFrom(ops, patchMap, 0, ref accumulator, new BitArray(ops.Length));
+			Console.WriteLine("#2: " + (ranToEnd ? accumulator.ToString() : "Infinite Loop Detected"));
+		}
+
+		static bool RunFrom(string[] ops, ILookup<string, string> patchMap, int instructionPointer, ref int accumulator, BitArray executedOps)
+		{
+			for (; 0 <= instructionPointer && ops.Length > instructionPointer && !executedOps[instructionPointer]; ++instructionPointer)
 			{
 				executedOps[instructionPointer] = true;
 				string op = ops[instructionPointer][..3];
 				string arg = ops[instructionPointer][4..];
 
-				// Simulate a op change if possible
-				int previousAcc = accumulator;
-				string simulateOp = fixMapping[op].FirstOrDefault();
-				simulationRanToEnd = null != simulateOp && RunFrom(ops,
-					instructionPointer + 1 + RunOp(simulateOp, arg, ref accumulator), (BitArray)executedOps.Clone(), ref accumulator);
-				if (simulationRanToEnd)
-					break;
-				// Continue normal execution with original accumulator
-				accumulator = previousAcc;
+				// ** Simulate a op change if needed
+				int savedAcc = accumulator;
+				string patchOp = patchMap?[op].FirstOrDefault();
+				if (null != patchOp && RunFrom(ops, null, instructionPointer + 1 + RunOp(patchOp, arg, ref accumulator), ref accumulator, (BitArray)executedOps.Clone()))
+					return true;
+				accumulator = savedAcc;
+				// **
+
 				instructionPointer += RunOp(op, arg, ref accumulator);
-			}
-
-			Console.WriteLine("#2: " + (simulationRanToEnd ? accumulator.ToString() : "Infinite Loop Detected"));
-		}
-
-		static bool RunFrom(string[] ops, int instructionPointer, BitArray executedOps, ref int accumulator)
-		{
-			for (; 0 <= instructionPointer && ops.Length > instructionPointer && !executedOps[instructionPointer]; ++instructionPointer)
-			{
-				executedOps[instructionPointer] = true;
-				instructionPointer += RunOp(
-					ops[instructionPointer][..3],
-					ops[instructionPointer][4..],
-					ref accumulator);
 			}
 
 			return ops.Length <= instructionPointer;
