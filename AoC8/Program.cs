@@ -38,7 +38,7 @@ namespace AoC8
 				string op = ops[instructionPointer][..3];
 				string arg = ops[instructionPointer][4..];
 
-				// ** Simulate a op change if needed
+				// ** Branch into a patch from here if needed
 				int savedAcc = accumulator;
 				string patchOp = patchMap?[op].FirstOrDefault();
 				if (null != patchOp && RunFrom(ops, null, instructionPointer + 1 + RunOp(patchOp, arg, ref accumulator), ref accumulator, (BitArray)executedOps.Clone()))
@@ -56,13 +56,9 @@ namespace AoC8
 		{
 			switch (op)
 			{
-				case "acc":
-					accumulator += int.Parse(arg);
-					return 0;
-				case "jmp":
-					return int.Parse(arg) - 1;
-				default:
-					return 0;
+				case "acc": accumulator += int.Parse(arg); return 0;
+				case "jmp":	return int.Parse(arg) - 1;
+				default:	return 0;
 			}
 		}
 
