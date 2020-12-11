@@ -29,8 +29,6 @@ namespace AoC10
 
 		static void Problem2(int[] wallToDevice)
 		{
-			//int canBeRemoved = wallToDevice.Where((v, i) => i > 0 && i < wallToDevice.Length && wallToDevice[i + 1] - wallToDevice[i - 1] <= 3).Count();
-
 			// Split input on the 3-gaps
 			var gaps3 = wallToDevice
 				.Select((v, i) => (v, i))
